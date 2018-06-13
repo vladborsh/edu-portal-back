@@ -1,6 +1,8 @@
 var User = require('../models/user.model');
 var jwt = require('jsonwebtoken');
-var secret = require('../config/dev.config').secret;
+
+var env = process.env.NODE_ENV || 'dev';
+var secret = require(`../config/${env}.config`).secret;
 
 exports.isAuthenticated = isAuthenticated;
 exports.isAdmin = isAdmin;

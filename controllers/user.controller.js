@@ -2,6 +2,7 @@ var User = require("../models/user.model").model;
 var jwt = require('jsonwebtoken');
 var env = process.env.NODE_ENV || 'dev';
 var secret = require('../config/' + env + '.config').secret;
+var sendEmail = require("../mailer/mailer.service").sendEmail;
 
 module.exports.getAll = getAll;
 module.exports.get = get;
@@ -9,6 +10,9 @@ module.exports.create = create;
 module.exports.update = update;
 module.exports.remove = remove;
 module.exports.auth = auth;
+module.exports.sendCode = sendCode;
+module.exports.verify = verify;
+module.exports.setNewPass = setNewPass;
 
 function getAll(req, res) {
   User.find().exec(function(err, items) {
@@ -70,7 +74,6 @@ function remove(req, res) {
 function auth(req, res) {
 	User
 	  .findOne({ email: req.body.email })
-	  .select('email password role firstName lastName _id')
 	  .exec(function (err, user) {
       if (err) throw err;
       if (!user) {
@@ -90,6 +93,52 @@ function auth(req, res) {
             username: user.firstName + ' ' + user.lastName
           });
         }
+      }
+    })
+}
+
+function sendCode(req, res) {
+  User
+    .findOne({ email: req.body.email })
+    .exec( (err, item) => {
+      if (err) throw err;
+      if (!item) {
+        res.json({ success: false, message: "Такого пользователя не существует" });
+      } else {
+        let code = String(Date.now()).slice(2,7);
+        sendEmail('v.borsh@gmial.com', item.email, 'Verification code', code);
+        item.verificationCode = code;
+        item.save();
+        res.json({ success: true, message: "Код отправлен" });
+      }
+    })
+}
+
+function verify(req, res) {
+  User
+    .findOne({ email: req.body.email })
+    .exec( (err, item) => {
+      if (err) throw err;
+      if (!item) {
+        res.json({ success: false, message: "Такого пользователя не существует" });
+      } else if (item.verificationCode === req.body.verificationCode) {
+        res.json({ success: true, message: "Код правильный. Можете сменить пароль" });
+      } else {
+        res.json({ success: false, message: "Код неправильный" });
+      }
+    })
+}
+
+function setNewPass(req, res) {
+  User
+    .findOne({ email: req.body.email, verificationCode: req.body.verificationCode })
+    .exec( (err, item) => {
+      if (err) throw err;
+      if (!item) {
+        res.json({ success: false, message: "Такого пользователя не существует" });
+      } else {
+        item.password = req.body.password
+        res.json({ success: false, message: "Пароль обновлен" });
       }
     })
 }

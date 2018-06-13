@@ -1,5 +1,4 @@
 var path = require("path");
-var router = require('express').Router();
 
 module.exports = function(app) {
   app.use("/api/user", require("./user.route"));
