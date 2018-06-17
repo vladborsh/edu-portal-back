@@ -2,17 +2,20 @@ var mongoose = require('mongoose');
 var GroupSchema = require('./group.model').sсhema;
 var Schema = mongoose.Schema;
 
-var CourseSchema = new Schema({
+var InstituteSchema = new Schema({
 	title: {
 		type : String
 	},
 	status: { 
 		type: String
     },
+	groups: {
+		type : [GroupSchema]
+	},
 	createdDate : {
 		type: Date
 	}
 });
 
-module.exports.sсhema = CourseSchema;
-module.exports.model = mongoose.model('Course', CourseSchema);
+module.exports.sсhema = InstituteSchema;
+module.exports.model = mongoose.model('Institute', InstituteSchema);

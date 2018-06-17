@@ -2,8 +2,6 @@ var mongoose = require("mongoose");
 var Schema = mongoose.Schema;
 var bcrypt = require("bcrypt-nodejs");
 
-var roles = ["Admin", "Teacher", "Student"];
-
 var UserSchema = new Schema({
   password: {
     type: String
@@ -23,7 +21,7 @@ var UserSchema = new Schema({
   },
   role: {
     type: String,
-    enum: roles
+    enum: ["Admin", "Teacher", "Student"]
   },
   course: {
     type: String
@@ -42,7 +40,16 @@ var UserSchema = new Schema({
   },
   createdDate: {
     type: Date
-  }
+  },
+  admissionDate: {
+    type: Date
+  },
+  educationForm: {
+    type: String
+  },
+  isBudget: {
+    type: Boolean
+  },
 });
 
 UserSchema.pre("save", function(next) {

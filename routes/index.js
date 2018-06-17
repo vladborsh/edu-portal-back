@@ -7,4 +7,5 @@ module.exports = function(app) {
   app.use("/api/activity", require("./activity.route"));
   app.use("/api/speciality", require("./speciality.route"));
   app.use("/api/course", require("./course.route"));
+  app.use("/api/intitute", require("./institute.route"));
 };
