@@ -12,15 +12,21 @@ var UserSchema = new Schema({
     type: String,
     unique: true
   },
-  lastName: {
+  name: {
     type: String
   },
-  firstName: {
+  birthdate: {
+    type: Date
+  },
+  address: {
     type: String
   },
   role: {
     type: String,
     enum: roles
+  },
+  course: {
+    type: String
   },
   institute: {
     type: String

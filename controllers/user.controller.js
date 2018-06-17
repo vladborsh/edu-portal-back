@@ -90,7 +90,8 @@ function auth(req, res) {
             token: token,
             role: user.role,
             id: user._id,
-            username: user.firstName + ' ' + user.lastName
+            firstName: user.firstName,
+            lastName: user.lastName,
           });
         }
       }
