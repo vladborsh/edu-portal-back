@@ -7,7 +7,7 @@ module.exports.update = update;
 module.exports.remove = remove;
 
 function getAll(req, res) {
-  Group.find().exec(function(err, items) {
+  Group.find().exec( (err, items) => {
     if (err) {
       res.json({ success: false, message: "Невозможно найти: " + err });
     } else {
@@ -17,7 +17,7 @@ function getAll(req, res) {
 }
 
 function get(req, res) {
-  Group.findById(req.params.id).exec(function(err, item) {
+  Group.findById(req.params.id).exec( (err, item) => {
     if (err) {
       res.json({ success: false, message: "Невозможно найти: " + err });
     } else {
@@ -29,8 +29,10 @@ function get(req, res) {
 function create(req, res) {
   var group = new Group(req.body);
   group.createdDate = Date.now();
-  group.save(function(err, item) {
+  console.log(group)
+  group.save( (err, item) => {
     if (err) {
+      console.log(err)
       res.json({ success: false, message: "Невозможно создать: " + err });
     } else {
       res.json({
@@ -43,7 +45,7 @@ function create(req, res) {
 }
 
 function update(req, res) {
-  Group.findByIdAndUpdate(req.params.id, req.body, function(err) {
+  Group.findByIdAndUpdate(req.params.id, req.body, (err) => {
     if (err) {
       res.json({ success: false, message: "Невозможно обновить: " + err });
     } else {
@@ -53,7 +55,7 @@ function update(req, res) {
 }
 
 function remove(req, res) {
-  Group.findById(req.params.id, function(err, item) {
+  Group.findById(req.params.id, (err, item) => {
     if (err) {
       res.json({ success: false, message: "Невозможно удалить: " + err });
     } else {

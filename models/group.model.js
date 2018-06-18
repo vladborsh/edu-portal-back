@@ -10,11 +10,11 @@ var GroupSchema = new Schema({
 	users: {
 		type : [UserSchema]
 	},
-	status: { 
-		type: String
-    },
     speciality: {
-        type: SpecialitySchema
+        type: String
+    },
+    institute: {
+        type: String
     },
 	createdDate : {
 		type: Date

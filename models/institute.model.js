@@ -4,7 +4,8 @@ var Schema = mongoose.Schema;
 
 var InstituteSchema = new Schema({
 	title: {
-		type : String
+		type : String,
+		unique: true
 	},
 	status: { 
 		type: String

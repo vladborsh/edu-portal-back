@@ -38,7 +38,7 @@ function create(req, res) {
   User
 	  .findOne({ email: req.body.email })
 	  .exec( (err, item) => {
-      console.log(item)
+      console.log(req.body)
       if(!!item) {
         res.json({
           success: false,
@@ -54,7 +54,9 @@ function create(req, res) {
           if (err) {
             res.json({ success: false, message: "Невозможно создать: " + err });
           } else {
-            sendEmail('v.borsh@gmial.com', item.email, 'Verification code', code);
+            if (!!item.email) {
+              sendEmail('v.borsh@gmial.com', item.email, 'Verification code', code);
+            }
             res.json({
               success: true,
               message: "Создано",

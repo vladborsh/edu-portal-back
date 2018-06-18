@@ -1,4 +1,4 @@
-var Speciality = require("../models/group.model").model;
+var Speciality = require("../models/speciality.model").model;
 
 module.exports.getAll = getAll;
 module.exports.get = get;
@@ -29,8 +29,10 @@ function get(req, res) {
 function create(req, res) {
   var speciality = new Speciality(req.body);
   speciality.createdDate = Date.now();
-  speciality.save(function(err, item) {
+  console.log(speciality)
+  speciality.save( (err, item) => {
     if (err) {
+      console.log(err)
       res.json({ success: false, message: "Невозможно создать: " + err });
     } else {
       res.json({

@@ -7,10 +7,13 @@ var SpecialitySchema = new Schema({
     },
     description: {
         type : String
-    },
-	status: { 
+	},
+    groupNaming: {
+        type : String
+	},
+	institute: {
 		type: String
-    },
+	},
 	createdDate : {
 		type: Date
 	}
