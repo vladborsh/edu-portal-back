@@ -1,4 +1,4 @@
-var Subject = require("../models/subject.model").model;
+var Scheduling = require("../models/scheduling.model").model;
 
 module.exports.getAll = getAll;
 module.exports.get = get;
@@ -7,7 +7,7 @@ module.exports.update = update;
 module.exports.remove = remove;
 
 function getAll(req, res) {
-  Subject.find().exec(function(err, items) {
+  Scheduling.find().exec( (err, items) => {
     if (err) {
       res.json({ success: false, message: "Невозможно найти: " + err });
     } else {
@@ -17,7 +17,7 @@ function getAll(req, res) {
 }
 
 function get(req, res) {
-  Subject.findById(req.params.id).exec(function(err, item) {
+  Scheduling.findById(req.params.id).exec( (err, item) => {
     if (err) {
       res.json({ success: false, message: "Невозможно найти: " + err });
     } else {
@@ -27,9 +27,9 @@ function get(req, res) {
 }
 
 function create(req, res) {
-  var subject = new Subject(req.body);
-  subject.createdDate = Date.now();
-  subject.save(function(err, item) {
+  var scheduling = new Scheduling(req.body);
+  scheduling.createdDate = Date.now();
+  scheduling.save( (err, item) => {
     if (err) {
       res.json({ success: false, message: "Невозможно создать: " + err });
     } else {
@@ -43,7 +43,7 @@ function create(req, res) {
 }
 
 function update(req, res) {
-  Subject.findByIdAndUpdate(req.params.id, req.body, (err) => {
+  Scheduling.findByIdAndUpdate(req.params.id, req.body, (err) => {
     if (err) {
       res.json({ success: false, message: "Невозможно обновить: " + err });
     } else {
@@ -53,7 +53,7 @@ function update(req, res) {
 }
 
 function remove(req, res) {
-  Subject.findById(req.params.id, (err, item) => {
+  Scheduling.findById(req.params.id, (err, item) => {
     if (err) {
       res.json({ success: false, message: "Невозможно удалить: " + err });
     } else {

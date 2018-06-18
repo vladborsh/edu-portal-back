@@ -15,7 +15,7 @@ module.exports.verify = verify;
 module.exports.setNewPass = setNewPass;
 
 function getAll(req, res) {
-  User.find().exec(function(err, items) {
+  User.find().exec( (err, items) => {
     if (err) {
       res.json({ success: false, message: "Невозможно найти: " + err });
     } else {
@@ -25,7 +25,7 @@ function getAll(req, res) {
 }
 
 function get(req, res) {
-  User.findById(req.params.id).exec(function(err, item) {
+  User.findById(req.params.id).exec( (err, item) => {
     if (err) {
       res.json({ success: false, message: "Невозможно найти: " + err });
     } else {
@@ -35,23 +35,39 @@ function get(req, res) {
 }
 
 function create(req, res) {
-  var user = new User(req.body);
-  user.createdDate = Date.now();
-  user.save(function(err, item) {
-    if (err) {
-      res.json({ success: false, message: "Невозможно создать: " + err });
-    } else {
-      res.json({
-        success: true,
-        message: "Создано",
-        item: item
-      });
-    }
-  });
+  User
+	  .findOne({ email: req.body.email })
+	  .exec( (err, item) => {
+      console.log(item)
+      if(!!item) {
+        res.json({
+          success: false,
+          message: "Невозможно создать: пользователь с таким email уже существует",
+        });
+      } else {
+        var user = new User(req.body);
+        let code = String(Date.now()).slice(2,7);
+        user.createdDate = Date.now();
+        user.verificationCode = code;
+        user.active = false;
+        user.save( (err, item) => {
+          if (err) {
+            res.json({ success: false, message: "Невозможно создать: " + err });
+          } else {
+            sendEmail('v.borsh@gmial.com', item.email, 'Verification code', code);
+            res.json({
+              success: true,
+              message: "Создано",
+              item: item
+            });
+          }
+        });
+      }
+    })
 }
 
 function update(req, res) {
-  User.findByIdAndUpdate(req.params.id, req.body, function(err) {
+  User.findByIdAndUpdate(req.params.id, req.body, (err) => {
     if (err) {
       res.json({ success: false, message: "Невозможно обновить: " + err });
     } else {
@@ -78,6 +94,8 @@ function auth(req, res) {
       if (err) throw err;
       if (!user) {
         res.json({success:false, message: 'Невозможно авторизироваться'});
+      } else if (user && !user.active) {
+        res.json({success:false, message: 'Невозможно авторизироваться. Пользователь еще не активирован'});
       } else {
         var validPassword = user.comparePassword(req.body.password);
         if (!validPassword) {
@@ -88,10 +106,7 @@ function auth(req, res) {
             success:true, 
             message: 'Пользователь авторизирован', 
             token: token,
-            role: user.role,
-            id: user._id,
-            firstName: user.firstName,
-            lastName: user.lastName,
+            id: user._id
           });
         }
       }
@@ -123,7 +138,11 @@ function verify(req, res) {
       if (!item) {
         res.json({ success: false, message: "Такого пользователя не существует" });
       } else if (item.verificationCode === req.body.verificationCode) {
-        res.json({ success: true, message: "Код правильный. Можете сменить пароль" });
+        item.active = true;
+        item.save();
+        res.json({ 
+          success: true, 
+          message: "Код правильный. Можете сменить пароль" });
       } else {
         res.json({ success: false, message: "Код неправильный" });
       }
@@ -131,6 +150,7 @@ function verify(req, res) {
 }
 
 function setNewPass(req, res) {
+  console.log(req.body);
   User
     .findOne({ email: req.body.email, verificationCode: req.body.verificationCode })
     .exec( (err, item) => {
@@ -138,8 +158,9 @@ function setNewPass(req, res) {
       if (!item) {
         res.json({ success: false, message: "Такого пользователя не существует" });
       } else {
-        item.password = req.body.password
-        res.json({ success: false, message: "Пароль обновлен" });
+        item.password = req.body.password;
+        item.save();
+        res.json({ success: true, message: "Пароль обновлен" });
       }
     })
 }

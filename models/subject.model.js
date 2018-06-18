@@ -8,7 +8,10 @@ var SubjectSchema = new Schema({
     description: {
         type : String
     },
-	status: { 
+	speciality: { 
+		type: String
+    },
+	group: { 
 		type: String
     },
 	createdDate : {

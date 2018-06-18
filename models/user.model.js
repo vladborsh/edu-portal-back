@@ -3,6 +3,9 @@ var Schema = mongoose.Schema;
 var bcrypt = require("bcrypt-nodejs");
 
 var UserSchema = new Schema({
+  active: {
+    type: Boolean
+  },
   password: {
     type: String
   },
@@ -50,6 +53,12 @@ var UserSchema = new Schema({
   isBudget: {
     type: Boolean
   },
+  position: {
+    type: String,
+  },
+  scienceDegree: {
+    type: String,
+  }
 });
 
 UserSchema.pre("save", function(next) {
