@@ -8,7 +8,7 @@ var GroupSchema = new Schema({
 		type : String
 	},
 	users: {
-		type : [UserSchema]
+		type : [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
 	},
     speciality: {
         type: String

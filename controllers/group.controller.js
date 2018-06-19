@@ -7,32 +7,34 @@ module.exports.update = update;
 module.exports.remove = remove;
 
 function getAll(req, res) {
-  Group.find().exec( (err, items) => {
-    if (err) {
-      res.json({ success: false, message: "Невозможно найти: " + err });
-    } else {
-      res.json(items);
-    }
+  Group.find()
+    .populate('users')
+    .exec( (err, items) => {
+      if (err) {
+        res.json({ success: false, message: "Невозможно найти: " + err });
+      } else {
+        res.json(items);
+      }
   });
 }
 
 function get(req, res) {
-  Group.findById(req.params.id).exec( (err, item) => {
-    if (err) {
-      res.json({ success: false, message: "Невозможно найти: " + err });
-    } else {
-      res.json(item);
-    }
+  Group.findById(req.params.id)
+    .populate('users')
+    .exec( (err, item) => {
+      if (err) {
+        res.json({ success: false, message: "Невозможно найти: " + err });
+      } else {
+        res.json(item);
+      }
   });
 }
 
 function create(req, res) {
   var group = new Group(req.body);
   group.createdDate = Date.now();
-  console.log(group)
   group.save( (err, item) => {
     if (err) {
-      console.log(err)
       res.json({ success: false, message: "Невозможно создать: " + err });
     } else {
       res.json({
