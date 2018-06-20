@@ -20,7 +20,6 @@ function getAll(req, res) {
 
 function get(req, res) {
   Group.findById(req.params.id)
-    .populate('users')
     .exec( (err, item) => {
       if (err) {
         res.json({ success: false, message: "Невозможно найти: " + err });

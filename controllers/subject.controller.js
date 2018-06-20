@@ -1,4 +1,6 @@
 var Subject = require("../models/subject.model").model;
+var Group = require("../models/group.model").model;
+var Journal = require("../models/group.model").JournalModel;
 
 module.exports.getAll = getAll;
 module.exports.get = get;
@@ -29,14 +31,28 @@ function get(req, res) {
 function create(req, res) {
   var subject = new Subject(req.body);
   subject.createdDate = Date.now();
-  subject.save(function(err, item) {
+  subject.save(function(err, subject) {
     if (err) {
       res.json({ success: false, message: "Невозможно создать: " + err });
     } else {
+      Group.findOne({ _id: req.body._group })
+        .populate('journals')
+        .exec( (err, group) => {
+          if (err) { console.log(err); return }
+          var journal = new Journal({
+            _subject: subject._id
+          });
+          journal.save( (err, journal ) => {
+            group.journals.push(journal._id);
+            group.save( (err, group) => {
+              if (err) { console.log(err); return }
+            })
+          })
+        })
       res.json({
         success: true,
         message: "Создано",
-        item: item
+        item: subject
       });
     }
   });

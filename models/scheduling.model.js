@@ -4,14 +4,14 @@ var GroupSchema = require('./group.model').sсhema;
 var SubjectSchema = require('./subject.model').sсhema;
 
 var SchedulingSchema = new Schema({
-    group: {
-        type : GroupSchema
+    _group: {
+		type : { type: mongoose.Schema.Types.ObjectId, ref: 'Group' }
     },
-	subject: { 
-		type: SubjectSchema
+	_subject: { 
+		type : { type: mongoose.Schema.Types.ObjectId, ref: 'Subject' }
     },
-	date: { 
-		type: String
+	weekDay: { 
+		type: Number
     },
 	orderNumber: { 
 		type: Number

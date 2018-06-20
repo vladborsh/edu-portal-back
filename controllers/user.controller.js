@@ -1,4 +1,6 @@
 var User = require("../models/user.model").model;
+var Group = require("../models/group.model").model;
+var JournalRow = require("../models/group.model").JournalRowModel
 var jwt = require('jsonwebtoken');
 var env = process.env.NODE_ENV || 'dev';
 var secret = require('../config/' + env + '.config').secret;
@@ -50,17 +52,36 @@ function create(req, res) {
         user.createdDate = Date.now();
         user.verificationCode = code;
         user.active = false;
-        user.save( (err, item) => {
+        user.save( (err, user) => {
           if (err) {
             res.json({ success: false, message: "Невозможно создать: " + err });
           } else {
-            if (!!item.email) {
-              sendEmail('v.borsh@gmial.com', item.email, 'Verification code', code);
+            if (!!user.email) {
+              sendEmail('v.borsh@gmial.com', user.email, 'Verification code', code);
             }
+            Group.findOne({ _id: req.body._group })
+              .populate('journals')
+              .exec( (err, group) => {
+                if (err) { console.log(err); return }
+                if (group.journals.length > 0) {
+                  var journalRow = new JournalRow({
+                    _student: user._id
+                  });
+                  journalRow.save( (err, jRow ) => {
+                    if (err) { console.log(err); return }
+                    group.journals.forEach((journal) => {
+                      journal.journalRows.add(jRow._id);
+                    })
+                    group.save( (err, group) => {
+                      if (err) { console.log(err); return }
+                    })
+                  })
+                }
+              })
             res.json({
               success: true,
               message: "Создано",
-              item: item
+              item: user
             });
           }
         });
