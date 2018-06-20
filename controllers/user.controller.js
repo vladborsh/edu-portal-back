@@ -70,7 +70,7 @@ function create(req, res) {
                   journalRow.save( (err, jRow ) => {
                     if (err) { console.log(err); return }
                     group.journals.forEach((journal) => {
-                      journal.journalRows.add(jRow._id);
+                      journal.journalRows.push(jRow._id);
                     })
                     group.save( (err, group) => {
                       if (err) { console.log(err); return }

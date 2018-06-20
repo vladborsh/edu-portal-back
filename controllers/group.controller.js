@@ -20,6 +20,13 @@ function getAll(req, res) {
 
 function get(req, res) {
   Group.findById(req.params.id)
+    .populate({
+      path: 'journals',
+      populate: {
+        path: '_subject',
+        model: 'Subject'
+      }
+    })
     .exec( (err, item) => {
       if (err) {
         res.json({ success: false, message: "Невозможно найти: " + err });
