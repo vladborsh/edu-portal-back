@@ -12,19 +12,19 @@ var MarkSchema = new Schema({
 
 var JournalRowSchema = new Schema({
 	_student: {
-		type : { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+		type: mongoose.Schema.Types.ObjectId, ref: 'User'
 	},
 	marks: {
-		type : [MarkSchema]
+		type : [{type: mongoose.Schema.Types.ObjectId, ref: 'Mark'}]
 	}
 })
 
 var JournalSchema = new Schema({
 	_subject: {
-		type : { type: mongoose.Schema.Types.ObjectId, ref: 'Subject' }
+		type: mongoose.Schema.Types.ObjectId, ref: 'Subject'
 	},
 	journalRows: {
-		type : [JournalRowSchema]
+		type : [{type: mongoose.Schema.Types.ObjectId, ref: 'JournalRow'}]
 	}
 })
 
@@ -33,7 +33,7 @@ var GroupSchema = new Schema({
 		type : String
 	},
 	journals: {
-		type : [JournalSchema]
+		type : [{type: mongoose.Schema.Types.ObjectId, ref: 'Journal'}]
 	},
     speciality: {
         type: String

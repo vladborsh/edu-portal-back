@@ -7,7 +7,10 @@ var ActivitySchema = new Schema({
 		type : String
 	},
 	user: {
-		type : UserSchema
+		type : String
+	},
+	_user: {
+		type : mongoose.Schema.Types.ObjectId, ref: 'User'
 	},
 	lastName: {
 		type : String

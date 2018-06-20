@@ -5,10 +5,10 @@ var SubjectSchema = require('./subject.model').sсhema;
 
 var SchedulingSchema = new Schema({
     _group: {
-		type : { type: mongoose.Schema.Types.ObjectId, ref: 'Group' }
+		type: mongoose.Schema.Types.ObjectId, ref: 'Group'
     },
 	_subject: { 
-		type : { type: mongoose.Schema.Types.ObjectId, ref: 'Subject' }
+		type: mongoose.Schema.Types.ObjectId, ref: 'Subject'
     },
 	weekDay: { 
 		type: Number
@@ -17,7 +17,7 @@ var SchedulingSchema = new Schema({
 		type: Number
     },
 	createdDate: { 
-		type: SubjectSchema
+		type: Date
     }
 });
 

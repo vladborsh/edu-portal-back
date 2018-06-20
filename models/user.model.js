@@ -39,7 +39,7 @@ var UserSchema = new Schema({
     type: String
   },
   _group: {
-    type: { type: mongoose.Schema.Types.ObjectId, ref: 'Group' }
+    type: mongoose.Schema.Types.ObjectId, ref: 'Group'
   },
   verificationCode: {
     type: String

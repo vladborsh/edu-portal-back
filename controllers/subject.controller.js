@@ -1,6 +1,8 @@
 var Subject = require("../models/subject.model").model;
 var Group = require("../models/group.model").model;
+var User = require("../models/user.model").model;
 var Journal = require("../models/group.model").JournalModel;
+var JournalRow = require("../models/group.model").JournalRowModel;
 
 module.exports.getAll = getAll;
 module.exports.get = get;
@@ -31,21 +33,45 @@ function get(req, res) {
 function create(req, res) {
   var subject = new Subject(req.body);
   subject.createdDate = Date.now();
-  subject.save(function(err, subject) {
+  subject.save( (err, subject) => {
     if (err) {
       res.json({ success: false, message: "Невозможно создать: " + err });
     } else {
       Group.findOne({ _id: req.body._group })
-        .populate('journals')
-        .exec( (err, group) => {
+        .exec((err, groupMajor) => {
           if (err) { console.log(err); return }
           var journal = new Journal({
             _subject: subject._id
           });
           journal.save( (err, journal ) => {
-            group.journals.push(journal._id);
-            group.save( (err, group) => {
+            if (err) { console.log(err); return }
+            groupMajor.journals.push(journal._id);
+            groupMajor.save( (err, group) => {
               if (err) { console.log(err); return }
+              User.find({ _group: group._id })
+                .exec( (err, users) => {
+                  if (err) { console.log(err); return }
+                  users.forEach(user => {
+                    var journalRow = new JournalRow();
+                    journalRow._student = user._id
+                    journalRow.save( (err, jRow ) => {                 
+                      if (err) { console.log(err); return }
+
+                      Group.findOne({ _id: req.body._group })
+                        .populate('journals')
+                        .exec((err, groupMajor) => 
+                          groupMajor.journals
+                            .filter( journal => journal._subject.toString() === subject._id.toString())
+                            .forEach( journal => {
+                              journal.journalRows.push(jRow._id);
+                              journal.save((err, jRow ) => {
+                                if (err) { console.log(err); return }
+                              })
+                          })
+                        )
+                    })
+                  });
+                })
             })
           })
         })

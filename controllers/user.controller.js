@@ -40,7 +40,6 @@ function create(req, res) {
   User
 	  .findOne({ email: req.body.email })
 	  .exec( (err, item) => {
-      console.log(req.body)
       if(!!item) {
         res.json({
           success: false,
@@ -64,16 +63,15 @@ function create(req, res) {
               .exec( (err, group) => {
                 if (err) { console.log(err); return }
                 if (group.journals.length > 0) {
-                  var journalRow = new JournalRow({
-                    _student: user._id
-                  });
+                  var journalRow = new JournalRow();
+                  journalRow._student = user._id
                   journalRow.save( (err, jRow ) => {
                     if (err) { console.log(err); return }
                     group.journals.forEach((journal) => {
                       journal.journalRows.push(jRow._id);
-                    })
-                    group.save( (err, group) => {
-                      if (err) { console.log(err); return }
+                      journal.save( (err, group) => {
+                        if (err) { console.log(err); return }
+                      })
                     })
                   })
                 }

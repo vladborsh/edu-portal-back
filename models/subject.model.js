@@ -12,7 +12,7 @@ var SubjectSchema = new Schema({
     type: String
   },
   _teacher: {
-    type: { type: mongoose.Schema.Types.ObjectId, ref: "User" }
+    type: mongoose.Schema.Types.ObjectId, ref: "User"
   },
   speciality: {
     type: String
@@ -21,7 +21,7 @@ var SubjectSchema = new Schema({
     type: String
   },
   _group: {
-    type: { type: mongoose.Schema.Types.ObjectId, ref: 'Group' }
+    type: mongoose.Schema.Types.ObjectId, ref: 'Group'
   },
   createdDate: {
     type: Date
