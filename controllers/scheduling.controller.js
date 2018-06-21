@@ -1,4 +1,6 @@
 var Scheduling = require("../models/scheduling.model").model;
+var mongoose = require("mongoose");
+
 
 module.exports.getAll = getAll;
 module.exports.get = get;
@@ -7,13 +9,16 @@ module.exports.update = update;
 module.exports.remove = remove;
 
 function getAll(req, res) {
-  Scheduling.find().exec( (err, items) => {
-    if (err) {
-      res.json({ success: false, message: "Невозможно найти: " + err });
-    } else {
-      res.json(items);
-    }
-  });
+  Scheduling
+    .find({ _group: mongoose.Types.ObjectId(req.params.id) })
+    .populate('_subject')
+    .exec((err, items) => {
+      if (err) {
+        res.json({ success: false, message: "Невозможно найти: " + err });
+      } else {
+        res.json(items);
+      }
+    });
 }
 
 function get(req, res) {
@@ -33,11 +38,7 @@ function create(req, res) {
     if (err) {
       res.json({ success: false, message: "Невозможно создать: " + err });
     } else {
-      res.json({
-        success: true,
-        message: "Создано",
-        item: item
-      });
+      res.json({ success: true, message: "Создано", item: item });
     }
   });
 }

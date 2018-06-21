@@ -5,9 +5,6 @@ var MarkSchema = new Schema({
 	mark: {
 		type : Number
 	},
-	date: {
-		type : Date
-	},
 })
 
 var JournalRowSchema = new Schema({
@@ -22,6 +19,9 @@ var JournalRowSchema = new Schema({
 var JournalSchema = new Schema({
 	_subject: {
 		type: mongoose.Schema.Types.ObjectId, ref: 'Subject'
+	},
+	marksDate: {
+		type: [String]
 	},
 	markListSize: {
 		type: Number

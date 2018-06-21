@@ -2,13 +2,17 @@ var Group = require("../models/group.model").model;
 var Mark = require("../models/group.model").MarkModel;
 var Journal = require("../models/group.model").JournalModel;
 var JournalRow = require("../models/group.model").JournalRowModel;
+var Scheduling = require("../models/scheduling.model").model;
+var mongoose = require("mongoose");
 
 module.exports.getAll = getAll;
 module.exports.get = get;
 module.exports.create = create;
 module.exports.update = update;
 module.exports.remove = remove;
-module.exports.updateJournal = updateJournal;
+module.exports.extendJournal = extendJournal;
+module.exports.updateMark = updateMark;
+module.exports.setJournalMarksDate = setJournalMarksDate;
 
 function getAll(req, res) {
   Group.find()
@@ -84,7 +88,7 @@ function create(req, res) {
   });
 }
 
-function updateJournal(req, res) {
+function extendJournal(req, res) {
   Journal.findById(req.params.id)
     .populate({
       path: 'journalRows',
@@ -113,6 +117,7 @@ function updateJournal(req, res) {
           () => {
             if (!journal.markListSize ) journal.markListSize = 0;
             journal.markListSize++;
+            journal.marksDate.push('');
             return journal.save()
           }
         )
@@ -122,6 +127,18 @@ function updateJournal(req, res) {
         .catch( err => console.log(err))
       }
     })
+}
+
+function setJournalMarksDate(req, res) {
+  Journal.findById(req.params.id)
+    .exec( (err, journal) => {
+      journal.marksDate = req.body.marksDate
+      journal.save()
+      .then(
+        () => res.json({success: true,message: "Обновлено"})
+      )
+      .catch( err => console.log(err))
+    });
 }
 
 function update(req, res) {
@@ -141,6 +158,16 @@ function remove(req, res) {
     } else {
       item.remove();
       res.json({ success: true, message: "Удалено" });
+    }
+  });
+}
+
+function updateMark(req, res) {
+  Mark.findByIdAndUpdate(req.params.id, req.body, err => {
+    if (err) {
+      res.json({ success: false, message: "Невозможно обновить: " + err });
+    } else {
+      res.json({ success: true, message: "Обновлено" });
     }
   });
 }

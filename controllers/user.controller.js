@@ -52,6 +52,7 @@ function create(req, res) {
         user.createdDate = Date.now();
         user.verificationCode = code;
         user.active = false;
+        console.log('create user')
         user.save()
         .then(
           user => {
@@ -59,6 +60,7 @@ function create(req, res) {
             if (!!user.email) {
               sendEmail('v.borsh@gmial.com', user.email, 'Verification code', code);
             }
+            console.log('find group')
             return Group.findOne({ _id: req.body._group })
               .populate({ path: 'journals' })
               .exec()
@@ -77,12 +79,14 @@ function create(req, res) {
                 })
               ) 
             } else {
-              res.json({ success: true, message: "Создано", item: user });
+              console.log('created')
+              return 'completed'
             }
           }
         )
         .then(
           journalRowList => {
+            if(journalRowList === 'completed') return 'completed'
             JOURNAL_ROWS = journalRowList;
             return Promise.all(
               GROUP.journals.map( (journal, i) => {
@@ -95,6 +99,7 @@ function create(req, res) {
         )
         .then(
           journals => {
+            if(journals === 'completed') return 'completed'
             return Promise.all( 
               JOURNAL_ROWS.map( (journalRow, i_main) => {
                 let marksList = [];
@@ -113,6 +118,7 @@ function create(req, res) {
         )
         .then(
           marksListOfLists => {
+            if(marksListOfLists === 'completed') return 'completed'
             console.log(marksListOfLists);
             return Promise.all( 
               marksListOfLists.map( (markList, i_main) => {
