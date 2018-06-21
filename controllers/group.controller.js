@@ -1,4 +1,6 @@
 var Group = require("../models/group.model").model;
+var Mark = require("../models/group.model").MarkModel;
+var Journal = require("../models/group.model").JournalModel;
 var JournalRow = require("../models/group.model").JournalRowModel;
 
 module.exports.getAll = getAll;
@@ -6,6 +8,7 @@ module.exports.get = get;
 module.exports.create = create;
 module.exports.update = update;
 module.exports.remove = remove;
+module.exports.updateJournal = updateJournal;
 
 function getAll(req, res) {
   Group.find()
@@ -65,7 +68,6 @@ function getJournalRows(group, res) {
 }
 
 
-
 function create(req, res) {
   var group = new Group(req.body);
   group.createdDate = Date.now();
@@ -80,6 +82,46 @@ function create(req, res) {
       });
     }
   });
+}
+
+function updateJournal(req, res) {
+  Journal.findById(req.params.id)
+    .populate({
+      path: 'journalRows',
+      populate: {
+        path: 'marks'
+      }
+    })
+    .exec( (err, journal) => {
+      if (err) {
+        res.json({ success: false, message: "Невозможно обновить: " + err });
+      } else {
+        Promise.all(
+          journal.journalRows.map( jRow => {
+            let mark = new Mark();
+            return new Promise( 
+              (resolve, reject) => mark.save( )
+              .then( mark => {
+                jRow.marks.push(mark._id)
+                return jRow.save()
+              })
+              .then( () => resolve() )
+            )
+          })
+        )
+        .then(
+          () => {
+            if (!journal.markListSize ) journal.markListSize = 0;
+            journal.markListSize++;
+            return journal.save()
+          }
+        )
+        .then(
+          () => res.json({success: true,message: "Обновлено"
+        }))
+        .catch( err => console.log(err))
+      }
+    })
 }
 
 function update(req, res) {

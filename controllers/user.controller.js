@@ -1,6 +1,7 @@
 var User = require("../models/user.model").model;
 var Group = require("../models/group.model").model;
-var JournalRow = require("../models/group.model").JournalRowModel
+var JournalRow = require("../models/group.model").JournalRowModel;
+var Mark = require("../models/group.model").MarkModel;
 var jwt = require('jsonwebtoken');
 var env = process.env.NODE_ENV || 'dev';
 var secret = require('../config/' + env + '.config').secret;
@@ -37,52 +38,106 @@ function get(req, res) {
 }
 
 function create(req, res) {
+  let GROUP;
+  let USER;
+  let JOURNAL_ROWS;
   User
 	  .findOne({ email: req.body.email })
 	  .exec( (err, item) => {
       if(!!item) {
-        res.json({
-          success: false,
-          message: "Невозможно создать: пользователь с таким email уже существует",
-        });
+        res.json({ success: false, message: "Невозможно создать: пользователь с таким email уже существует" });
       } else {
         var user = new User(req.body);
         let code = String(Date.now()).slice(2,7);
         user.createdDate = Date.now();
         user.verificationCode = code;
         user.active = false;
-        user.save( (err, user) => {
-          if (err) {
-            res.json({ success: false, message: "Невозможно создать: " + err });
-          } else {
+        user.save()
+        .then(
+          user => {
+            USER = user;
             if (!!user.email) {
               sendEmail('v.borsh@gmial.com', user.email, 'Verification code', code);
             }
-            Group.findOne({ _id: req.body._group })
-              .populate('journals')
-              .exec( (err, group) => {
-                if (err) { console.log(err); return }
-                if (group.journals.length > 0) {
-                  var journalRow = new JournalRow();
-                  journalRow._student = user._id
-                  journalRow.save( (err, jRow ) => {
-                    if (err) { console.log(err); return }
-                    group.journals.forEach((journal) => {
-                      journal.journalRows.push(jRow._id);
-                      journal.save( (err, group) => {
-                        if (err) { console.log(err); return }
-                      })
-                    })
-                  })
+            return Group.findOne({ _id: req.body._group })
+              .populate({ path: 'journals' })
+              .exec()
+          }
+        )
+        .then(
+          group => {
+            GROUP = group;
+            if (group.journals.length > 0) {
+              return Promise.all(
+                group.journals.map( journal => {
+                  let journalRow = new JournalRow();
+                  journalRow._student = USER._id
+                  console.log('save journal row for user')
+                  return journalRow.save();
+                })
+              ) 
+            } else {
+              res.json({ success: true, message: "Создано", item: user });
+            }
+          }
+        )
+        .then(
+          journalRowList => {
+            JOURNAL_ROWS = journalRowList;
+            return Promise.all(
+              GROUP.journals.map( (journal, i) => {
+                journal.journalRows.push(JOURNAL_ROWS[i]._id);
+                console.log('save journal row id in journal')
+                return journal.save()
+              })
+            )
+          }
+        )
+        .then(
+          journals => {
+            return Promise.all( 
+              JOURNAL_ROWS.map( (journalRow, i_main) => {
+                let marksList = [];
+                if (!!journals[i_main].markListSize) {
+                  for ( let i = 0; i < journals[i_main].markListSize; i++ ) {
+                    let mark = new Mark();
+                    marksList.push(mark.save());
+                  }
+                } 
+                console.log('save marks list journal row ')
+                console.log(marksList.length)
+                return Promise.all(marksList);
+              })
+            );
+          }
+        )
+        .then(
+          marksListOfLists => {
+            console.log(marksListOfLists);
+            return Promise.all( 
+              marksListOfLists.map( (markList, i_main) => {
+                if (markList.length == 0) {
+                  return Promise.resolve();
+                } else {
+                  markList.forEach( (mark,i) => {
+                    JOURNAL_ROWS[i_main].marks.push(mark._id);
+                    console.log('save mark id in journal row')
+                  });
+                  return JOURNAL_ROWS[i_main].save();
                 }
               })
-            res.json({
-              success: true,
-              message: "Создано",
-              item: user
-            });
+            );
           }
-        });
+        )
+        .then(
+          () => {
+            res.json({ success: true, message: "Создано", item: user });
+          }
+        ).catch(
+          err => {
+            res.json({ success: false, message: "Невозможно создать: " + err });
+          }
+        )
       }
     })
 }

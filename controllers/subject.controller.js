@@ -31,13 +31,93 @@ function get(req, res) {
 }
 
 function create(req, res) {
+  let GROUP;
+  let JOURNAL;
+  let JOURNAL_ROWS;
   var subject = new Subject(req.body);
   subject.createdDate = Date.now();
   subject.save( (err, subject) => {
     if (err) {
       res.json({ success: false, message: "Невозможно создать: " + err });
     } else {
+
       Group.findOne({ _id: req.body._group })
+        .exec()
+        .then(
+          groupMajor => {
+            GROUP = groupMajor
+            let journal = new Journal({
+              _subject: subject._id
+            });
+            console.log('save journal');
+            return journal.save();
+          }
+        )
+        .then(
+          journal => {
+            JOURNAL = journal;
+            GROUP.journals.push(journal._id);
+            console.log('add journal to group');
+            return GROUP.save();
+          }
+        )
+        .then(
+          group => {
+            return User.find({ _group: group._id }).exec();
+          }
+        )
+        .then(
+          users => {
+            if (users.length == 0) {
+              res.json({ success: true, message: "Создано", item: subject });
+            } else {
+              return Promise.all(
+                users.map( user => {
+                  let journalRow = new JournalRow();
+                  journalRow._student = user._id;
+                  console.log('save journal row');
+                  return journalRow.save();
+                })
+              );
+            }
+          }
+        )
+        .then(
+          journalRowList => { 
+            JOURNAL_ROWS = [...journalRowList]
+            return Group.findOne({ _id: req.body._group }).populate('journals');
+          }
+        )
+        .then(
+          group => {
+            return Promise.all(
+              group.journals
+                .filter( journal => journal._id.toString() === JOURNAL._id.toString())
+                .map( (journal,i) => {
+                  JOURNAL_ROWS.forEach( journalRow => {
+                    journal.journalRows.push(journalRow._id);
+                  })
+                  console.log('save journal row id to journal');
+                  return journal.save();
+                })
+            );
+          }
+        )
+        .then(
+          () => {
+            res.json({ success: true, message: "Создано", item: subject });
+          }
+        )
+        .catch(
+          err => {
+            res.json({ success: false,message: "Невозможно создать: " + err });
+          }
+        )
+      }
+    });
+  }
+
+      /* Group.findOne({ _id: req.body._group })
         .exec((err, groupMajor) => {
           if (err) { console.log(err); return }
           var journal = new Journal({
@@ -74,15 +154,8 @@ function create(req, res) {
                 })
             })
           })
-        })
-      res.json({
-        success: true,
-        message: "Создано",
-        item: subject
-      });
-    }
-  });
-}
+        }) */
+      
 
 function update(req, res) {
   Subject.findByIdAndUpdate(req.params.id, req.body, (err) => {

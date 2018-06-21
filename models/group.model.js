@@ -23,6 +23,9 @@ var JournalSchema = new Schema({
 	_subject: {
 		type: mongoose.Schema.Types.ObjectId, ref: 'Subject'
 	},
+	markListSize: {
+		type: Number
+	},
 	journalRows: {
 		type : [{type: mongoose.Schema.Types.ObjectId, ref: 'JournalRow'}]
 	}
